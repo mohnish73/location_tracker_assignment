@@ -21,6 +21,7 @@ class BootReceiver : BroadcastReceiver() {
             return
         }
         try {
+
             LocationService.start(context)
         } catch (e: Exception) {
             Log.e(TAG, "Could not restart tracking after ${intent.action}", e)
