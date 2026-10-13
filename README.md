@@ -11,11 +11,12 @@ No Flutter plugins are used for location, background work or storage. The only a
 
 | | |
 |---|---|
-| Start time | _fill in_ |
-| End time | _fill in_ |
-| Test device | _fill in (model)_, Android _fill in_ |
-| APK | _Google Drive link_ |
-| Screen recording | _link_ |
+| Start time | 5:00 PM |
+| End time | 7:45 PM |
+| Test device | Motorola Edge 40 Neo, Android 15 |
+| GitHub repository | https://github.com/mohnish73/location_tracker_assignment |
+| APK (`app-release.apk`) | [Google Drive](https://drive.google.com/file/d/14yQd5UaqHljm-qDp3c3BhUgEiuV_YcO_/view?usp=sharing) |
+| Demo video | [Google Drive](https://drive.google.com/file/d/1hop4UebcCFCugP2Q0tcXRoruXFbhimSi/view?usp=sharing) |
 
 ## Versions
 
@@ -169,6 +170,9 @@ Dart converts these (plus `NOT_IMPLEMENTED` and `INVALID_RESPONSE`) into `Channe
 - When the UI reopens or resumes, it reads the last fix and status from SQLite/Kotlin. If tracking was ON but an OEM killed the service, the UI restarts it.
 - The app can request an exemption from battery optimisation, which aggressive OEM skins (MIUI, ColorOS) need. On those devices, "Autostart" may also need to be enabled manually.
 - Note: **Force stop** from system Settings stops everything until the user opens the app again. Android enforces this for all apps.
+- Android 11+ gives a location foreground service started **from the background** (after reboot, an app update, or a system restart) no "while-in-use" location access, so fixes are throttled and the notification may not show. `MainActivity.onResume()` re-starts the service from the foreground whenever tracking is ON, which restores full access. A service started with the Start button (and later swiped away) keeps full access.
+- The notification channel uses `IMPORTANCE_DEFAULT` with no sound/vibration. With `IMPORTANCE_LOW`, Android 12+ moves it to the "Silent" section and some skins (e.g. Motorola) collapse it to an icon, hiding latitude/longitude/time.
+- When run from an IDE in **debug** mode (`flutter run --start-paused`), reopening the app after killing it can stay on the splash screen: the service keeps the process alive and the new Dart isolate starts paused, waiting for the debugger. Release/profile builds are not affected.
 
 ## Permission flow
 

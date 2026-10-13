@@ -20,7 +20,14 @@ import java.util.Locale
 /** Builds and updates the persistent foreground-service notification. */
 object TrackingNotification {
 
-    const val CHANNEL_ID = "location_tracking"
+    /**
+     * IMPORTANCE_DEFAULT (without sound/vibration) keeps the notification in the main shade.
+     * With IMPORTANCE_LOW, Android 12+ moves it to the "Silent" section and some OEM skins
+     * collapse it to an icon, hiding the latitude / longitude / time.
+     * Importance can't change after a channel is created, hence the new id.
+     */
+    const val CHANNEL_ID = "location_tracking_v2"
+    private const val LEGACY_CHANNEL_ID = "location_tracking"
     const val NOTIFICATION_ID = 1001
 
     private const val REQUEST_OPEN_APP = 10
@@ -28,15 +35,19 @@ object TrackingNotification {
 
     fun createChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        manager.deleteNotificationChannel(LEGACY_CHANNEL_ID)
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Location tracking",
-            NotificationManager.IMPORTANCE_LOW,
+            NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
             description = "Shows the latest recorded location while tracking is on"
+            setSound(null, null)
+            enableVibration(false)
             setShowBadge(false)
         }
-        context.getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
+        manager.createNotificationChannel(channel)
     }
 
     fun build(context: Context, record: LocationRecord?, locationServicesOn: Boolean = true): Notification {
@@ -70,8 +81,7 @@ object TrackingNotification {
             .setStyle(NotificationCompat.BigTextStyle().bigText(details))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setSilent(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setShowWhen(record != null)
