@@ -13,7 +13,6 @@ class LocationTrackerApp extends StatelessWidget {
 
   static const _seed = Color(0xFF1565C0);
 
-
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
